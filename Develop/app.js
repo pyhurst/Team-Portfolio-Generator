@@ -93,22 +93,22 @@ function addMemberQuestions() {
         {
             type: 'input',
             message: 'What is your team member\'s name?',
-            name: 'memberName'
+            name: 'name'
         },
         {
             type: 'input',
             message: 'What is your team member\'s email?',
-            name: 'memberEmail'
+            name: 'email'
         },
         {
             type: 'number',
             message: 'What is your team member\'s id?',
-            name: 'memberId'
+            name: 'id'
         },
         {
             type: 'list',
             message: 'What is your team member\'s role?',
-            name: 'memberRole',
+            name: 'role',
             choices: [
                 'Manager',
                 'Engineer',
@@ -150,7 +150,8 @@ async function moreMembers() {
     const answer = await addMember();
     if(answer.addMember === 'Yes') {
         const nextMember = await addMemberQuestions();
-        uniqueQuestion(nextMember);
+        await uniqueQuestion(nextMember);
+        moreMembers();
     } else {
         const filteredMems = [];
         members.filter(member => {
@@ -159,9 +160,14 @@ async function moreMembers() {
             }
         });
         if(filteredMems.length > 0){
-            console.log('Carry on!')
+            console.log('Carry on!');
+            const html = await render(members);
+            fs.writeFile(outputPath, html, function(err) {
+                if (err) throw err;
+            })
         } else {
-            console.log('You must add a manger to the team!')
+            console.log('You must add a manger to the team!');
+            moreMembers();
         }
     }
 }
