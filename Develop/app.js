@@ -79,7 +79,7 @@ function addMember() {
         {
             type: 'list',
             message: 'Would you like to add a member to the team?',
-            name: 'addmember',
+            name: 'addMember',
             choices: [
                 'Yes',
                 'No'
@@ -123,28 +123,64 @@ function addMemberQuestions() {
 async function init() {
     try {
         const employee = await initQuestions();
-        console.log(employee);
+        // console.log(employee);
         if(employee.role === 'Manager'){
             const officeNum = await managerQuestions();
             const newManager = new Manager(employee.name, employee.id, employee.email, officeNum.office);
+            members.push(newManager);
             // const newMember = await addMember();
-            console.log(newManager);
+            // console.log(newManager);
         } else if (employee.role === 'Engineer') {
-            const github = await engineerQuestions();
+            const gbUserName = await engineerQuestions();
+            const newEngineer = new Engineer(employee.name, employee.id, employee.email, gbUserName.github);
+            members.push(newEngineer);
         } else {
-            const school = await internQuestions();
+            const internSchool = await internQuestions();
+            const newIntern = new Intern(employee.name, employee.id, employee.email, internSchool.school);
+            members.push(newIntern);
         }
-        console.log(employee);
-        // const emArr = Object.values(employee);
-        // members.push(emArr);
-        // render(members);
-        // console.log(members);
+        moreMembers();
     } catch (err) {
         console.log(err);
     }
 }
 init();
 
+async function moreMembers() {
+    const answer = await addMember();
+    if(answer.addMember === 'Yes') {
+        const nextMember = await addMemberQuestions();
+        uniqueQuestion(nextMember);
+    } else {
+        const filteredMems = [];
+        members.filter(member => {
+            if (member.role === 'Manager') {
+                filteredMems.push(member);
+            }
+        });
+        if(filteredMems.length > 0){
+            console.log('Carry on!')
+        } else {
+            console.log('You must add a manger to the team!')
+        }
+    }
+}
+
+async function uniqueQuestion(nextMember) {
+    if(nextMember.role === 'Manager'){
+        const officeNum = await managerQuestions();
+        const newManager = new Manager(nextMember.name, nextMember.id, nextMember.email, officeNum.office);
+        members.push(newManager);
+    } else if (nextMember.role === 'Engineer') {
+        const gbUserName = await engineerQuestions();
+        const newEngineer = new Engineer(nextMember.name, nextMember.id, nextMember.email, gbUserName.github);
+        members.push(newEngineer);
+    } else {
+        const internSchool = await internQuestions();
+        const newIntern = new Intern(nextMember.name, nextMember.id, nextMember.email, internSchool.school);
+        members.push(newIntern);
+    }
+}
 // After you have your html, you're now ready to create an HTML file using the HTML
 // returned from the `render` function. Now write it to a file named `team.html` in the
 // `output` folder. You can use the variable `outputPath` above target this location.
